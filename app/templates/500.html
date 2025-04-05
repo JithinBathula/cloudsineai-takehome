@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4">500 - Server Error</h1>
+        <p class="lead">Sorry, something went wrong on our end. We are looking into it.</p>
+        <p class="text-muted">Please try again later or return home.</p>
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary mt-3">Go Home</a>
+        {% if error_message and config.DEBUG %}
+            <div class="alert alert-danger mt-4 text-start">
+                <strong>Debug Info:</strong><br>
+                <pre>{{ error_message }}</pre>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
