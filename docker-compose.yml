@@ -1,45 +1,43 @@
-version: "3.8"
+# docker-compose.yml (Modified Version)
+
+# The 'version' attribute is obsolete, you can remove it if you like.
+# version: '3.8'
 
 services:
   web:
     build:
       context: .
-      # Use 'development' stage from Dockerfile if you add one for dev dependencies
-      # target: development
+      # No need for --no-cache unless debugging build steps again
     container_name: virustotal_scanner_web
     ports:
       # Map host port 5000 to container port 5000
       - "5000:5000"
     volumes:
-      # Mount the host's uploads directory to the container's volume mount point
-      # This ensures uploads persist across container restarts.
-      - ./uploads:/app/uploads
-      # --- FOR DEVELOPMENT ONLY ---
-      # Uncomment below to mount code for live-reloading (requires FLASK_DEBUG=1)
-      # Gunicorn needs the --reload flag in the CMD for this, or use Flask's dev server.
-      # - ./app:/app/app
-      # - ./config.py:/app/config.py
-      # - ./wsgi.py:/app/wsgi.py
-      # command: ["flask", "run", "--host=0.0.0.0", "--port=5000"] # Example using Flask dev server
-      # command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "1", "--reload", "wsgi:app"] # Example Gunicorn dev
+      # --- CHANGE HERE ---
+      # REMOVE this line (the bind mount):
+      # - ./uploads:/app/uploads
+      # ADD this line (to use the named volume 'uploads_data'):
+      - uploads_data:/app/uploads
+      # --- END CHANGE ---
     env_file:
       # Load environment variables from the .env file in the project root
       - .env
     environment:
-      # Override or set additional environment variables if needed
-      # Example: Ensure production config is used by Gunicorn if not set in .env
+      # Ensure production config is used by Gunicorn if not set in .env
       - FLASK_CONFIG=${FLASK_CONFIG:-production}
     restart: unless-stopped
-    # Optional healthcheck: Checks if the app responds on the root URL
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"]
       interval: 60s
       timeout: 10s
       retries: 3
-      start_period: 30s # Give container time to start up
+      start_period: 30s
 
-# Define the named volume for uploads (alternative to bind mount)
-# If using this, change volumes section under 'web' service to:
-# - uploads_volume:/app/uploads
-# volumes:
-#   uploads_volume:
+# --- ADD THIS SECTION AT THE BOTTOM ---
+# Define the named volume
+volumes:
+  uploads_data:
+    # You can leave it empty like this, Docker uses default 'local' driver
+    # Or explicitly add:
+    # driver: local
+# --- END ADDED SECTION ---
