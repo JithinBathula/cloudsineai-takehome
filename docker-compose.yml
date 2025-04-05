@@ -1,29 +1,15 @@
-# docker-compose.yml (Modified Version)
-
-# The 'version' attribute is obsolete, you can remove it if you like.
-# version: '3.8'
-
 services:
   web:
     build:
       context: .
-      # No need for --no-cache unless debugging build steps again
     container_name: virustotal_scanner_web
     ports:
-      # Map host port 5000 to container port 5000
-      - "5000:5000"
+      - "5000:5000" # Optional now that Nginx will be used
     volumes:
-      # --- CHANGE HERE ---
-      # REMOVE this line (the bind mount):
-      # - ./uploads:/app/uploads
-      # ADD this line (to use the named volume 'uploads_data'):
       - uploads_data:/app/uploads
-      # --- END CHANGE ---
     env_file:
-      # Load environment variables from the .env file in the project root
       - .env
     environment:
-      # Ensure production config is used by Gunicorn if not set in .env
       - FLASK_CONFIG=${FLASK_CONFIG:-production}
     restart: unless-stopped
     healthcheck:
@@ -33,11 +19,16 @@ services:
       retries: 3
       start_period: 30s
 
-# --- ADD THIS SECTION AT THE BOTTOM ---
-# Define the named volume
+  nginx:
+    image: nginx:alpine
+    container_name: virustotal_scanner_nginx
+    ports:
+      - "80:80" # This is where Nginx will listen (you'll visit http://localhost)
+    volumes:
+      - ./nginx/flask_app.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+    restart: unless-stopped
+
 volumes:
   uploads_data:
-    # You can leave it empty like this, Docker uses default 'local' driver
-    # Or explicitly add:
-    # driver: local
-# --- END ADDED SECTION ---

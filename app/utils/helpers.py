@@ -2,6 +2,7 @@
 import os
 from flask import current_app
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 # allowed_file function removed
 
@@ -25,3 +26,15 @@ def cleanup_file(filepath):
             current_app.logger.error(f"Error removing temporary file {filepath}: {e}")
     elif filepath:
          current_app.logger.debug(f"Attempted to clean up non-existent file: {filepath}")
+
+
+def format_timestamp(timestamp_int, fmt='%Y-%m-%d %H:%M:%S UTC'):
+    """Converts a Unix timestamp to formatted string."""
+    if timestamp_int is None:
+        return "N/A"
+    try:
+        dt_object = datetime.utcfromtimestamp(int(timestamp_int))
+        return dt_object.strftime(fmt)
+    except (ValueError, TypeError) as e:
+        current_app.logger.error(f"Error formatting timestamp {timestamp_int}: {e}")
+        return "Invalid Date"
