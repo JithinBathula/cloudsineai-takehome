@@ -24,23 +24,32 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Stage 3: Application Image
 FROM base as runtime
 
+# Create a non-root user and group FIRST
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup --no-create-home appuser
+
 # Copy installed dependencies from builder stage
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
+# Important: Copy code BEFORE changing ownership of /app if needed, or copy to a temp location first
 COPY app /app/app
 COPY config.py .
 COPY wsgi.py .
-# We don't copy .env - it should be provided at runtime
 
-# Create the upload directory (ensure path matches config.py if changed)
-# Use a directory outside /app if preferred, but /app/uploads is simple
-RUN mkdir -p /app/uploads && chown -R nobody:nogroup /app/uploads
-VOLUME /app/uploads # Define mount point for uploads volume
+# Create the upload directory
+RUN mkdir -p /app/uploads
 
-# Create a non-root user and switch to it
-RUN adduser --system --group --no-create-home appuser
+# --- Change ownership of the uploads directory to the appuser ---
+# Use chown BEFORE switching user
+RUN chown -R appuser:appgroup /app/uploads
+# Optional: If appuser needed write access to other parts of /app (unlikely here)
+# RUN chown -R appuser:appgroup /app
+
+# Define mount point for uploads volume
+VOLUME /app/uploads
+
+# Switch to the non-root user
 USER appuser
 
 # Expose the port the application runs on
@@ -48,9 +57,7 @@ EXPOSE 5000
 
 # Set runtime environment variables
 ENV FLASK_APP wsgi.py
-ENV FLASK_CONFIG production # Default to production config
+ENV FLASK_CONFIG production
 
 # Command to run the application using Gunicorn
-# Point Gunicorn to the 'app' object within the 'wsgi.py' module (which is created by create_app)
-# Use a sensible number of workers (adjust '4' based on instance CPU cores, e.g., 2 * num_cores + 1)
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "--timeout", "330", "--log-level", "info", "wsgi:app"]
