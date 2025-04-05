@@ -17,7 +17,7 @@ def index():
             return redirect(request.url)
 
         original_filename = secure_filename(file.filename)
-        if not is_allowed_file(file.filename):
+        if not is_allowed_file(original_filename):
             flash('File type not allowed. Please upload a valid file type.', 'danger')
             return redirect(request.url)
 
