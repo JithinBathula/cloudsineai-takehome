@@ -17,6 +17,7 @@ class Config:
     VT_API_URL_ANALYSES = "https://www.virustotal.com/api/v3/analyses/"
     VT_POLL_INTERVAL = 15
     VT_MAX_POLL_TIME = 300
+    MAX_CONTENT_LENGTH = 32 * 1024 * 1024
 
     @staticmethod
     def init_app(app):

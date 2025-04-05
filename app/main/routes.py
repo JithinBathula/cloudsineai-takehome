@@ -3,7 +3,7 @@ from flask import render_template, request, redirect, url_for, flash, current_ap
 from werkzeug.utils import secure_filename
 
 from . import main
-from ..utils.helpers import get_safe_upload_path, cleanup_file
+from ..utils.helpers import is_allowed_file, get_safe_upload_path, cleanup_file
 from ..services.virustotal import upload_to_virustotal, get_virustotal_report
 
 
@@ -17,6 +17,10 @@ def index():
             return redirect(request.url)
 
         original_filename = secure_filename(file.filename)
+        if not is_allowed_file(file.filename):
+            flash('File type not allowed. Please upload a valid file type.', 'danger')
+            return redirect(request.url)
+
         filepath = None
 
         try:

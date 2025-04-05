@@ -1,23 +1,32 @@
-# app/utils/helpers.py
 import os
+from datetime import datetime
 from flask import current_app
 from werkzeug.utils import secure_filename
-from datetime import datetime
 
-# allowed_file function removed
+# Allowed file extensions for uploads
+ALLOWED_EXTENSIONS = {'exe', 'pdf', 'zip', 'docx', 'xlsx', 'txt', 'jpg', 'png', 'js', 'txt'}
+
+def is_allowed_file(filename):
+    """
+    Check if the file has an allowed extension.
+    """
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_safe_upload_path(filename):
-     """Generates a safe path within the configured UPLOAD_FOLDER."""
-     # Sanitize filename to prevent directory traversal or invalid names
-     safe_filename = secure_filename(filename)
-     if not safe_filename: # Handle cases where secure_filename returns empty (e.g., filename is just '.')
-         safe_filename = "upload_" + str(os.urandom(8).hex()) # Generate a random name
-
-     # Return the full path
-     return os.path.join(current_app.config['UPLOAD_FOLDER'], safe_filename)
+    """
+    Generate a safe, unique path within the configured UPLOAD_FOLDER.
+    Sanitizes filename to avoid injection or traversal vulnerabilities.
+    """
+    safe_filename = secure_filename(filename)
+    if not safe_filename:
+        # If filename is invalid (e.g. just '.'), generate a random fallback
+        safe_filename = "upload_" + os.urandom(8).hex()
+    return os.path.join(current_app.config['UPLOAD_FOLDER'], safe_filename)
 
 def cleanup_file(filepath):
-    """Safely removes a file if it exists, logging errors."""
+    """
+    Safely removes a file if it exists, and logs the outcome.
+    """
     if filepath and os.path.exists(filepath):
         try:
             os.remove(filepath)
@@ -25,11 +34,13 @@ def cleanup_file(filepath):
         except OSError as e:
             current_app.logger.error(f"Error removing temporary file {filepath}: {e}")
     elif filepath:
-         current_app.logger.debug(f"Attempted to clean up non-existent file: {filepath}")
-
+        current_app.logger.debug(f"Attempted to clean up non-existent file: {filepath}")
 
 def format_timestamp(timestamp_int, fmt='%Y-%m-%d %H:%M:%S UTC'):
-    """Converts a Unix timestamp to formatted string."""
+    """
+    Converts a Unix timestamp to a human-readable string.
+    Used in Jinja templates with the `strftime` filter.
+    """
     if timestamp_int is None:
         return "N/A"
     try:
