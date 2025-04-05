@@ -1,0 +1,5 @@
+Flask>=2.1 # Specify a reasonable recent version
+python-dotenv>=0.20
+requests>=2.27
+gunicorn>=20.1
+Werkzeug>=2.1 # For secure_filename and file handling

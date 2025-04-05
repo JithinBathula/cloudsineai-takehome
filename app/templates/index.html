@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Upload & Scan{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        {# --- Upload Form Card --- #}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Upload File for VirusTotal Scan</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Select a file to upload for scanning.
+                </p>
+                {# Note: 'needs-validation' enables Bootstrap styling hooks #}
+                <form method="post" enctype="multipart/form-data" id="uploadForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label">Choose file</label>
+                        <input class="form-control" type="file" id="fileInput" name="file_to_scan" required>
+                        <div class="invalid-feedback"> {# Shown by Bootstrap validation #}
+                            Please select a file to upload.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cloud-upload-fill me-2" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 0a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 4.095 0 5.555 0 7.318 0 9.366 1.708 11 3.781 11H7.5V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11h4.188C14.502 11 16 9.57 16 7.773c0-1.636-1.242-2.969-2.834-3.194C12.923 1.999 10.69 0 8 0m-.5 14.5V11h1v3.5a.5.5 0 0 1-1 0"/>
+                          </svg>
+                        Upload and Scan
+                    </button>
+                </form>
+
+                {# Spinner / Progress Indicator Area (controlled by JS) #}
+                <div class="spinner-container mt-3" id="spinnerContainer">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2 mb-0">Scanning file, please wait...</p>
+                    <small class="text-muted">This may take a moment depending on VirusTotal's queue.</small>
+                </div>
+            </div>
+        </div>{# End Upload Form Card #}
+
+        {# --- Results Section --- #}
+        {# Conditionally include the results template #}
+        {# The template needs 'results' and 'filename' from the Flask context #}
+        {# It will only render the card if these indicate something should be shown #}
+        {% include '_results.html' %}
+        {# --- End Results Section --- #}
+
+    </div>{# End Column #}
+</div>{# End Row #}
+{% endblock content %}
+
+{# All custom JS is now in static/js/main.js #}
