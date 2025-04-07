@@ -4,7 +4,7 @@ from flask import Flask, request, render_template
 from config import config
 from app.utils.helpers import format_timestamp  # moved here
 
-def create_app(config_name=None):
+def create_app(config_name):
     """Application factory function."""
     config_name = config_name or os.getenv('FLASK_CONFIG', 'default')
     app = Flask(__name__, instance_relative_config=False)

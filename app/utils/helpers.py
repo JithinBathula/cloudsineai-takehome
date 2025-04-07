@@ -12,15 +12,10 @@ def is_allowed_file(filename):
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Consider modifying to always include randomization:
 def get_safe_upload_path(filename):
-    """
-    Generate a safe, unique path within the configured UPLOAD_FOLDER.
-    Sanitizes filename to avoid injection or traversal vulnerabilities.
-    """
-    safe_filename = secure_filename(filename)
-    if not safe_filename:
-        # If filename is invalid (e.g. just '.'), generate a random fallback
-        safe_filename = "upload_" + os.urandom(8).hex()
+    # Add timestamp or UUID to prevent collisions
+    safe_filename = f"{os.urandom(4).hex()}_{secure_filename(filename)}"
     return os.path.join(current_app.config['UPLOAD_FOLDER'], safe_filename)
 
 def cleanup_file(filepath):

@@ -1,81 +1,61 @@
-{# app/templates/_results.html #}
-{# Included template for displaying scan results. #}
-{# Expects 'results' (dict or None) and 'filename' (str) in context. #}
-
-{# Determine card classes based on results #}
-{% set card_border = 'border-secondary' %}
-{% set card_header_bg = 'bg-secondary text-white' %}
-{% set show_results_content = False %}
-{% set show_failed_content = False %}
-
-{% if results %}
-     {# Results obtained successfully #}
-     {% set show_results_content = True %}
-     {% set attributes = results.data.attributes %}
-     {% set stats = attributes.stats %}
-     {% set is_malicious = stats.malicious > 0 %}
-     {% set is_suspicious = stats.suspicious > 0 %}
-     {% set card_border = 'border-danger' if is_malicious else ('border-warning' if is_suspicious else 'border-success') %}
-     {% set card_header_bg = 'bg-danger text-white' if is_malicious else ('bg-warning text-dark' if is_suspicious else 'bg-success text-white') %}
-{% elif filename %}
-     {# Case where polling failed/timed out after a POST, filename is known but results are None #}
-     {% set show_failed_content = True %}
-     {% set card_border = 'border-warning' %}
-     {% set card_header_bg = 'bg-warning text-dark' %}
-{% endif %}
-
-{# Only render the card if there's something to show #}
 {% if show_results_content or show_failed_content %}
-<div class="card shadow-sm {{ card_border }}" id="resultsSection"> {# ID for JS manipulation #}
+<div class="card shadow-sm {{ card_border }}" id="resultsSection">
     <div class="card-header {{ card_header_bg }}">
-       <h5 class="mb-0">
-            {% if show_results_content %}Scan Results: {{ filename }}{% else %}Scan Status: {{ filename }}{% endif %}
-       </h5>
+        <h5 class="mb-0">
+            {% if show_results_content %}
+                Scan Results: {{ filename }}
+            {% else %}
+                Scan Status: {{ filename }}
+            {% endif %}
+        </h5>
     </div>
+
     <div class="card-body">
         {% if show_results_content %}
-             {# Display results summary #}
-             <p>
+            <p>
                 <strong>Overall Status:</strong>
                 {% if is_malicious %}
                     <span class="badge bg-danger fs-6">Malicious</span>
                 {% elif is_suspicious %}
                     <span class="badge bg-warning text-dark fs-6">Suspicious</span>
                 {% else %}
-                     <span class="badge bg-success fs-6">Clean / Undetected</span>
+                    <span class="badge bg-success fs-6">Clean / Undetected</span>
                 {% endif %}
             </p>
-             <p>
-                 <strong>Analysis Summary:</strong><br>
-                 <span class="badge bg-danger me-1">{{ stats.malicious }} Malicious</span>
-                 <span class="badge bg-warning text-dark me-1">{{ stats.suspicious }} Suspicious</span>
-                 <span class="badge bg-info text-dark me-1">{{ stats.timeout }} Timeout</span>
-                 <span class="badge bg-secondary me-1">{{ stats.undetected }} Undetected</span>
-                 <span class="badge bg-success me-1">{{ stats.harmless }} Harmless</span>
-             </p>
-             <p>
-                 <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFullReport" aria-expanded="false" aria-controls="collapseFullReport">
-                     Toggle Full Report Details
-                 </button>
-             </p>
-             <div class="collapse" id="collapseFullReport">
+
+            <p>
+                <strong>Analysis Summary:</strong><br>
+                <span class="badge bg-danger me-1">{{ stats.malicious }} Malicious</span>
+                <span class="badge bg-warning text-dark me-1">{{ stats.suspicious }} Suspicious</span>
+                <span class="badge bg-info text-dark me-1">{{ stats.timeout }} Timeout</span>
+                <span class="badge bg-secondary me-1">{{ stats.undetected }} Undetected</span>
+                <span class="badge bg-success me-1">{{ stats.harmless }} Harmless</span>
+            </p>
+
+            <p>
+                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFullReport" aria-expanded="false" aria-controls="collapseFullReport">
+                    Toggle Full Report Details
+                </button>
+            </p>
+
+            <div class="collapse" id="collapseFullReport">
                 <h6 class="mt-3">Full JSON Report:</h6>
-                <div class="results-box"> {# Class defined in style.css #}
-                     {{ results | tojson(indent=2) }}
+                <div class="results-box">
+                    {{ results | tojson(indent=2) }}
                 </div>
             </div>
         {% elif show_failed_content %}
-             {# Display message for failed polling #}
-             <p class="card-text text-danger">
+            <p class="card-text text-danger">
                 Could not retrieve scan results at this time. This might be due to a timeout or an API issue. Please check server logs or try again later.
-             </p>
+            </p>
         {% endif %}
     </div>
-    {% if show_results_content %} {# Footer only shown if scan was successful #}
+
+    {% if show_results_content %}
     <div class="card-footer text-muted">
         Scan completed: {{ attributes.date | int | strftime('%Y-%m-%d %H:%M:%S UTC') if attributes.date else 'N/A' }}
         {% if results.data.id %}(Analysis ID: {{ results.data.id }}){% endif %}
     </div>
     {% endif %}
 </div>
-{% endif %} {# End check for show_results_content or show_failed_content #}
+{% endif %}
