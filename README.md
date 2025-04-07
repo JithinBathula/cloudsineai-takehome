@@ -8,6 +8,14 @@ This project is a secure, containerized web application that allows users to upl
 
 ---
 
+## 🌐 Live Demo
+
+You can try the deployed app here:
+
+👉 [http://54.253.181.106/](http://54.253.181.106/)
+
+This is hosted on an AWS EC2 instance, running the containerized Flask app behind Nginx and Gunicorn.
+
 ## 🚀 Features
 
 - ✅ File upload with basic validation (via Flask)
@@ -101,15 +109,3 @@ This project is a secure, containerized web application that allows users to upl
 - This version does not use a database; data is ephemeral.
 - No login/auth required — this is a single-user public demo.
 - The app works best with small files under the VirusTotal upload limit (32MB for free API).
-
----
-
-## ✅ Final Thoughts
-
-This take-home project was designed to showcase:
-
-- Practical Flask development skills
-- Clean, modular, and maintainable code
-- Production-ready deployment using Docker and Nginx
-- Thoughtful error handling and UI feedback
-- Security awareness and file handling hygiene
